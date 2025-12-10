@@ -414,6 +414,8 @@ This prevents tests from failing when libraries like Unleash poll for feature fl
 
 Integration tests that write to databases need clean state between runs. Rather than manually truncating specific tables or recreating the database, a dynamic nuke function discovers and clears all tables automatically. This approach scales effortlessly as your schema evolves without maintaining cleanup code.
 
+**Note:** The implementation below is PostgreSQL-specific. If using MySQL, SQLite, or other databases, you'll need to adapt the SQL syntax and system catalog queries accordingly.
+
 ### Key Benefits
 
 1. **Zero Maintenance**: Automatically finds and clears all tables without hardcoding names
