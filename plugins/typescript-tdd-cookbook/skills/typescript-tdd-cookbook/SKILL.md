@@ -214,7 +214,7 @@ it("rejects invalid email from validator", async () => {
 
 This pattern makes error validation tests clear and maintainable.
 
-## Pattern 5: Mocking HTTP with Nock
+## Pattern 5: Stubbing HTTP with Nock
 
 ### Overview
 
