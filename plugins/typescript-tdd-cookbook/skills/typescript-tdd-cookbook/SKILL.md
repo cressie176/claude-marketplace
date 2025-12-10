@@ -6,9 +6,61 @@ allowed-tools: Read
 
 # TypeScript TDD Cookbook
 
-Great tests tell a simple, focused story. You see instantly what behaviour is under test and which values actually matter. That means pulling the noise out of sight and keeping only the essential details in view. The patterns in this cookbook exist to support that aim: they strip away clutter, clarify intent and help your tests express the behaviour you actually care about rather than the mechanics required to exercise it.
+Great tests tell a simple, focused story. You see instantly what behaviour is under test and which values actually matter. That means pulling the noise out of sight and keeping only the essential details in view. The patterns in this cookbook exist to support that aim: they strip away clutter, clarify intent and help your tests express the behaviour you actually care about rather than wrestling with boilerplate, ceremony or verbose APIs. At the heart of this is maximising the signal-to-noise ratio: every line in your test should contribute to understanding the behaviour.
 
-## Pattern 1: ObjectMother / TestDataFactory Pattern
+## Use Node's Built-in Test Framework
+
+### Overview
+
+Node's built-in test framework and assertion library are more than adequate for most testing needs. Unless your codebase already uses a third-party framework, prefer Node's native tools to reduce dependencies, maintenance burden, and cognitive overhead. Node's assertion library is deliberately minimal, avoiding the verbose fluent APIs that add noise without adding clarity.
+
+### Key Benefits
+
+1. **Zero Dependencies**: No additional packages to install, update, or maintain
+2. **High Signal-to-Noise**: Concise assertions without fluent API ceremony
+3. **Reduced Maintenance**: One less dependency to track and upgrade
+4. **Aliasing Support**: Import with short names to minimise boilerplate
+
+### Usage Examples
+
+#### Import with Aliases
+
+```typescript
+import { describe, it, before, beforeEach, after } from 'node:test';
+import { equal as eq, ok, rejects, match } from 'node:assert/strict';
+```
+
+#### Prefer Multiple Assertions Over Deep Equality
+
+```typescript
+it("creates user with correct properties", () => {
+  const user = createUser({ name: 'Alice', age: 30 });
+
+  eq(user.name, 'Alice');
+  eq(user.age, 30);
+  ok(user.id);
+});
+```
+
+Deep equality assertions make failures harder to debug because you can't immediately see which property failed. Multiple `eq()` calls are clearer and pinpoint failures precisely. Use `ok()` for unpredictable values like generated IDs, and `eq()` for everything else.
+
+**Avoid Fluent APIs**: Libraries with `.not.toBe()` or `.toHaveProperty()` chains add visual noise. Compare:
+
+```typescript
+// Fluent API (noisy)
+expect(user.name).not.toBe(undefined);
+expect(user.age).toEqual(30);
+expect(user).toHaveProperty('id');
+
+// Node assertions (signal)
+eq(user.name, 'Alice');
+eq(user.age, 30);
+ok(user.id);
+```
+
+The Node approach removes ceremony, letting you focus on what's being tested rather than navigating API syntax.
+
+## ObjectMother / TestDataFactory Pattern
 
 ### Overview
 
@@ -73,7 +125,7 @@ it("creates company with specific details", async () => {
 
 This pattern makes tests self-documenting: the values you set are the values you care about.
 
-## Pattern 2: Test Client Pattern
+## Test Client Pattern
 
 ### Overview
 
@@ -124,7 +176,7 @@ it("creates company", async () => {
 
 The test client abstracts HTTP complexity while tests focus on behavior and assertions.
 
-## Pattern 3: Controlling Time in Tests
+## Controlling Time in Tests
 
 ### Overview
 
@@ -172,7 +224,7 @@ it("calculates expiry time", () => {
 
 This pattern eliminates timing flakiness and makes time-dependent tests fast and reliable.
 
-## Pattern 4: Testing Async Rejection
+## Testing Async Rejection
 
 ### Overview
 
@@ -214,7 +266,7 @@ it("rejects invalid email from validator", async () => {
 
 This pattern makes error validation tests clear and maintainable.
 
-## Pattern 5: Stubbing HTTP with Nock
+## Stubbing HTTP with Nock
 
 ### Overview
 
@@ -307,7 +359,7 @@ it("handles connection failure", async () => {
 
 This pattern gives you complete control over HTTP behavior in tests without external dependencies.
 
-## Pattern 6: Database Cleanup with Nuke
+## Database Cleanup with Nuke
 
 ### Overview
 
