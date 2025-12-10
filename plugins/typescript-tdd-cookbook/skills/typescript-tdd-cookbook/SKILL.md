@@ -171,3 +171,45 @@ it("calculates expiry time", () => {
 ```
 
 This pattern eliminates timing flakiness and makes time-dependent tests fast and reliable.
+
+## Pattern 4: Testing Async Rejection
+
+### Overview
+
+Good tests cover both success and failure paths. When testing code that should reject with specific errors, Node's built-in `assert.rejects()` provides clear, expressive assertions without try-catch clutter.
+
+**Note:** For synchronous errors, use `assert.throws()` instead of `assert.rejects()`.
+
+### Key Benefits
+
+1. **Clear Intent**: Explicitly shows this test expects rejection
+2. **Flexible Validation**: Assert exact messages or match patterns for unpredictable errors
+3. **Clean Syntax**: No manual promise handling or try-catch blocks
+
+### Usage Examples
+
+#### Assert Exact Error Message
+
+```typescript
+import { rejects } from 'node:assert/strict';
+
+it("rejects underage users", async () => {
+  await rejects(() => validateAge(16), { message: 'Must be 18 or older' });
+});
+```
+
+#### Match Message and Stack Trace
+
+```typescript
+import { rejects, match } from 'node:assert/strict';
+
+it("rejects invalid email from validator", async () => {
+  await rejects(() => userService.createUser(data), (err: Error) => {
+    match(err.message, /invalid email/i);
+    match(err.stack!, /at EmailValidator\.validate/);
+    return true;
+  });
+});
+```
+
+This pattern makes error validation tests clear and maintainable.
