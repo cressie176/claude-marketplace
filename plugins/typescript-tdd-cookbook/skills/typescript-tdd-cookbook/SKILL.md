@@ -306,3 +306,113 @@ it("handles connection failure", async () => {
 ```
 
 This pattern gives you complete control over HTTP behavior in tests without external dependencies.
+
+## Pattern 6: Database Cleanup with Nuke
+
+### Overview
+
+Integration tests that write to databases need clean state between runs. Rather than manually truncating specific tables or recreating the database, a dynamic nuke function discovers and clears all tables automatically. This approach scales effortlessly as your schema evolves without maintaining cleanup code.
+
+### Key Benefits
+
+1. **Zero Maintenance**: Automatically finds and clears all tables without hardcoding names
+2. **Fast Cleanup**: Truncate is faster than dropping and recreating databases
+3. **Safe by Design**: Built-in safeguards prevent running on production databases
+
+### Implementation
+
+#### Database Migration (PostgreSQL)
+
+```sql
+DO $$
+BEGIN
+  -- Only create nuke function if explicitly enabled
+  IF current_setting('allow_nuke', true) = 'true' THEN
+    CREATE OR REPLACE FUNCTION nuke_data()
+    RETURNS void
+    LANGUAGE plpgsql
+    AS $func$
+    DECLARE
+      table_names text;
+    BEGIN
+      -- Disable foreign key constraints and triggers
+      SET session_replication_role = replica;
+
+      -- Get all user tables except migrations (you may need to change this for your project)
+      SELECT string_agg(tablename, ', ')
+      INTO table_names
+      FROM pg_tables
+      WHERE schemaname = 'public'
+      AND tablename != 'migrations';
+
+      -- Truncate all tables if any exist
+      IF table_names IS NOT NULL THEN
+        EXECUTE 'TRUNCATE ' || table_names || ' RESTART IDENTITY CASCADE';
+      END IF;
+
+      -- Restore normal constraint checking
+      SET session_replication_role = DEFAULT;
+    END;
+    $func$;
+  END IF;
+END;
+$$;
+```
+
+#### Database Wrapper Class
+
+```typescript
+import { Pool } from 'pg';
+
+export default class Database {
+  private pool: Pool;
+
+  constructor(config: any) {
+    this.pool = new Pool(config);
+  }
+
+  async start(): Promise<void> {
+    // Run migrations or other startup tasks
+  }
+
+  async stop(): Promise<void> {
+    await this.pool.end();
+  }
+
+  async nuke(): Promise<void> {
+    await this.pool.query('SELECT nuke_data()');
+  }
+}
+```
+
+### Usage Example
+
+```typescript
+import { describe, it, before, beforeEach, after } from 'node:test';
+import Database from '../src/Database';
+
+describe("UserService", () => {
+  let database: Database;
+
+  before(async () => {
+    database = new Database({
+      host: 'localhost',
+      database: 'myapp_test',
+      user: 'test_user',
+      password: 'test_password',
+      options: '-c allow_nuke=true'
+    });
+    await database.start();
+  });
+
+  beforeEach(async () => {
+    await database.nuke();
+  });
+
+  after(async () => {
+    await database.stop();
+  });
+});
+```
+
+This pattern ensures clean test isolation without manually tracking which tables need cleanup.
