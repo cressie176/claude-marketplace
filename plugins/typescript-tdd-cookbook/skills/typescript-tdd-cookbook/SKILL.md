@@ -490,3 +490,38 @@ describe("UserService", () => {
 ```
 
 This pattern ensures clean test isolation without manually tracking which tables need cleanup.
+
+## Testing Event Emitters
+
+### Overview
+
+Event emitters are common in Node.js applications, but testing them requires care to avoid listener leaks and race conditions. The key challenges are ensuring listeners are cleaned up after tests, waiting for events to fire before making assertions, and preventing the test from completing before assertions run. Using `emitter.once()` automatically removes listeners, the `done` callback ensures the test waits for the event, and wrapping the entire test in an IIFE lets you use async/await for setup while working with Node's callback-based test API.
+
+### Key Benefits
+
+1. **Automatic Cleanup**: `once()` removes listeners after firing, preventing cross-test contamination
+2. **Async Setup**: IIFE pattern allows async operations for test setup
+3. **Clear Intent**: Tests explicitly show what event is expected and what it should contain
+
+### Usage Example
+
+```typescript
+import { it } from 'node:test';
+import { equal as eq } from 'node:assert/strict';
+
+it("emits user-created event", (done) => {
+  (async () => {
+    const userService = new UserService();
+
+    userService.once('user-created', (user) => {
+      eq(user.name, 'Alice');
+      eq(user.role, 'admin');
+      done();
+    });
+
+    await userService.createUser({ name: 'Alice', role: 'admin' });
+  })();
+});
+```
+
+This pattern prevents listener leaks and handles async setup cleanly.
