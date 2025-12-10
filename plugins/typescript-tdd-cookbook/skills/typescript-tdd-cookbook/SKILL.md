@@ -12,7 +12,7 @@ Great tests tell a simple, focused story. You see instantly what behaviour is un
 
 ### Overview
 
-Great tests tell a simple story about behaviour and intent. Test data is often where that story falls apart: sprawling, highly duplicated fixtures swamp what the test is really trying to say. Static, centralised fixtures help a little, but they soon become cumbersome and brittle as every new case needs yet more hard coded data. A better approach is to randomly generate realistic data, then explicitly override the few values you care about. The result is a cleaner test suite with far clearer intent.Static, centralised fixtures help a little, but they soon become cumbersome and brittle as every new case needs yet more hard coded data. A better approach is to randomly generate realistic data, then explicitly override the few values you care about. The result is a cleaner test suite with far clearer intent.
+Test data is often where the readability of a test falls apart: sprawling, highly duplicated fixtures swamp what the test is really trying to say. Static, centralised fixtures help a little, but they soon become cumbersome and brittle as every new case needs yet more hard coded data. A better approach is to randomly generate realistic data, then explicitly override the few values you care about. The result is a cleaner test suite with far clearer intent.Static, centralised fixtures help a little, but they soon become cumbersome and brittle as every new case needs yet more hard coded data. A better approach is to randomly generate realistic data, then explicitly override the few values you care about. The result is a cleaner test suite with far clearer intent.
 
 ### Key Benefits
 
