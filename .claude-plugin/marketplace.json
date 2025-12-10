@@ -12,7 +12,7 @@
     {
       "name": "macos-tools",
       "source": "./macos-tools",
-      "version": "1.0.0",
+      "version": "1.2.0",
       "description": "macOS command line tools for improving Claude Code productivity",
       "author": {
         "name": "Stephen Cresswell"
