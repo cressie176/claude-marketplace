@@ -284,6 +284,28 @@ Testing code that makes HTTP requests without hitting real servers requires stub
 npm install -D nock
 ```
 
+### Setup
+
+```typescript
+import { describe, it, before, afterEach } from 'node:test';
+import { ok } from 'node:assert/strict';
+import nock from 'nock';
+
+describe("UserService", () => {
+
+  before(() => {
+    nock.disableNetConnect();
+  });
+
+  afterEach(() => {
+    ok(nock.isDone(), 'pending mocks: %j', nock.pendingMocks());
+    nock.cleanAll();
+  });
+});
+```
+
+Always call `nock.disableNetConnect()` to prevent accidental real HTTP requests, check `nock.isDone()` with `nock.pendingMocks()` to ensure all stubbed calls were made, and `nock.cleanAll()` to clear interceptors.
+
 ### Usage Examples
 
 #### Stub Successful HTTP Response
