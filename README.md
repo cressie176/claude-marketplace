@@ -1,4 +1,4 @@
-# claude-marketplace
+# cressie176-claude-marketplace
 
 Personal Claude Code plugin marketplace for custom plugins, skills, agents, and tools.
 

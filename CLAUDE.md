@@ -116,13 +116,13 @@ Add this marketplace to your projects via `.claude/settings.json`:
   "extraKnownMarketplaces": [
     {
       "source": "github",
-      "repo": "cressie176/claude-marketplace"
+      "repo": "cressie176/cressie176-claude-marketplace"
     }
   ]
 }
 ```
 
-Or via command: `/plugin marketplace add cressie176/claude-marketplace`
+Or via command: `/plugin marketplace add cressie176/cressie176-claude-marketplace`
 
 Plugins are then browsable and installable via `/plugin` command in Claude Code.
 
