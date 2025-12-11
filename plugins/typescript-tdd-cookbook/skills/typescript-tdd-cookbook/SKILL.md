@@ -8,6 +8,8 @@ allowed-tools: Read
 
 Great tests tell a simple, focused story. You see instantly what behaviour is under test and which values actually matter. That means pulling the noise out of sight and keeping only the essential details in view. The patterns in this cookbook exist to support that aim: they strip away clutter, clarify intent and help your tests express the behaviour you actually care about rather than wrestling with boilerplate, ceremony or verbose APIs. At the heart of this is maximising the signal-to-noise ratio: every line in your test should contribute to understanding the behaviour.
 
+**Note:** While examples use Node's test framework and assert library, the principles apply equally to Jest, Vitest, Mocha, or any other testing framework.
+
 ## Use Node's Built-in Test Framework
 
 ### Overview
