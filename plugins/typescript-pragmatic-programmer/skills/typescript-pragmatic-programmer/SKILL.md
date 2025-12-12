@@ -100,3 +100,149 @@ app.post('/api/users', async (c) => {
 - **Thin slice first**: Get one simple case working end-to-end
 - **Expand incrementally**: Add complexity layer by layer
 - **Test integration early**: Don't build components in isolation then hope they integrate
+
+## Use High-Quality Libraries: Don't Reinvent the Wheel
+
+### Overview
+
+Before implementing functionality yourself, check if the user has expressed a preference for a suitable library. If not, search for well-maintained, high-quality libraries on npm. Reusing proven solutions saves time, reduces bugs, and gives you battle-tested code that handles edge cases you might miss.
+
+### The Principle
+
+Writing custom implementations is expensive: you pay for development time, testing time, bug fixes, maintenance, and opportunity cost. Good libraries have already paid these costs and spread them across thousands of users. Your time is better spent on domain-specific problems that differentiate your application.
+
+### Process
+
+When you need common functionality:
+
+1. **Use existing dependencies**: Is there already a library in package.json that can handle this?
+2. **Check user preferences**: Has the user specified a library preference in their configuration, documentation, skills or previous prompts?
+3. **Search npm**: Look for high-quality libraries if no preference exists
+4. **Evaluate quality**: Check downloads, maintenance, TypeScript support, bundle size
+5. **Install and use**: Add the dependency rather than implementing from scratch
+
+### Examples
+
+#### Generating Unique IDs
+
+**Instead of:**
+```typescript
+// Custom implementation with potential collisions
+function generateId(): string {
+  return Math.random().toString(36).substring(2, 15);
+}
+```
+
+**First check**: Does the user have a preferred ID generation library?
+
+**If not, recommend:**
+```typescript
+import { nanoid } from 'nanoid';
+
+const id = nanoid();  // URL-safe, collision-resistant
+```
+
+**Alternative libraries**: `uuid`, `ulid`, `cuid2`
+
+#### URL Canonicalization
+
+**Instead of:**
+```typescript
+// Custom URL normalization with edge cases
+function canonicalizeUrl(url: string): string {
+  return url.toLowerCase().replace(/\/$/, '');
+}
+```
+
+**First check**: Does the user have a preferred URL manipulation library?
+
+**If not, recommend:**
+```typescript
+import { normalizeUrl } from '@sindresorhus/normalize-url';
+
+const canonical = normalizeUrl('HTTP://Example.com//path/');
+// 'http://example.com/path'
+```
+
+**Alternative libraries**: `normalize-url`, `url-parse`
+
+#### Date Manipulation
+
+**Instead of:**
+```typescript
+// Custom date math with bugs
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+```
+
+**First check**: Does the user have a preferred date library?
+
+**If not, recommend:**
+```typescript
+import { addDays, format } from 'date-fns';
+
+const future = addDays(new Date(), 7);
+const formatted = format(future, 'yyyy-MM-dd');
+```
+
+**Alternative libraries**: `dayjs`, `luxon`
+
+#### Input Validation
+
+**Instead of:**
+```typescript
+// Custom validation prone to edge cases
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+```
+
+**First check**: Does the user have a preferred validation library?
+
+**If not, recommend:**
+```typescript
+import { z } from 'zod';
+
+const EmailSchema = z.string().email();
+
+function validateEmail(email: string): boolean {
+  return EmailSchema.safeParse(email).success;
+}
+```
+
+**Alternative libraries**: `yup`, `joi`, `superstruct`
+
+### When to Write Your Own
+
+Write custom implementations only when:
+
+- **Domain-specific logic**: The functionality is unique to your business domain
+- **No suitable library exists**: You've searched and found nothing appropriate
+- **Library is abandoned**: Last update was years ago with open critical issues
+- **Extreme simplicity**: The implementation is truly 2-3 lines (e.g., `Math.max(a, b)`)
+- **Performance critical**: Profiling shows the library is a bottleneck (rare)
+
+### How to Evaluate Libraries
+
+When recommending libraries, consider:
+
+- **Maintenance**: Number of long-standing / serious issues. Recent commits and releases
+- **TypeScript support**: Native types or @types package
+- **Downloads**: npm weekly downloads (higher suggests stability)
+- **Size**: Bundle size impact (use bundlephobia.com)
+- **Dependencies**: Fewer transitive dependencies reduces risk
+- **Documentation**: Clear examples and API docs
+- **Tests**: Well-tested with high coverage
+
+### Guidelines
+
+- **Check user preferences FIRST**: Look in package.json, project docs, or ask
+- **Search before coding**: Spend 5 minutes searching npm before implementing
+- **Prefer well-maintained**: Choose libraries with recent activity
+- **TypeScript-first**: Prefer libraries with native TypeScript support
+- **Bundle size matters**: Check impact on frontend applications
+- **Read the docs**: Understand the API before dismissing as "too complex"
+- **Domain code only**: Save your effort for problems unique to your application
