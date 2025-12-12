@@ -8,6 +8,58 @@ allowed-tools: Read, Grep, Glob, Edit, Write
 
 This cookbook provides proven PostgreSQL patterns and best practices for common database operations.
 
+## Naming Conventions
+
+### Overview
+
+Always use **snake_case** for table names, column names, and all SQL identifiers. This is the de facto standard in the PostgreSQL ecosystem and prevents issues with case sensitivity and identifier quoting.
+
+### Why snake_case?
+
+1. **Case insensitivity**: PostgreSQL folds unquoted identifiers to lowercase. Using camelCase requires explicit quoting everywhere.
+2. **Community standard**: The PostgreSQL community overwhelmingly uses snake_case.
+
+### Pattern
+
+**Good - snake_case:**
+```sql
+CREATE TABLE user_account (
+  user_id BIGSERIAL PRIMARY KEY,
+  email_address TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_login_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_user_account_email ON user_account(email_address);
+
+SELECT user_id, email_address, created_at
+FROM user_account
+WHERE last_login_at > NOW() - INTERVAL '30 days';
+```
+
+**Bad - camelCase (requires quoting):**
+```sql
+-- DON'T DO THIS
+CREATE TABLE "userAccount" (
+  "userId" BIGSERIAL PRIMARY KEY,
+  "emailAddress" TEXT NOT NULL,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Every query requires quotes
+SELECT "userId", "emailAddress"
+FROM "userAccount"
+WHERE "createdAt" > NOW();
+```
+
+### Best Practices
+
+1. **Table names**: Singular snake_case (e.g., `user_account`, `order_item`)
+2. **Column names**: snake_case (e.g., `user_id`, `email_address`, `created_at`)
+3. **Indexes**: Prefix with `idx_` followed by table and columns (e.g., `idx_user_email`)
+4. **Functions**: snake_case verbs (e.g., `cleanup_old_logs`, `process_pending_jobs`)
+5. **Never quote**: If you find yourself needing quotes, rename to snake_case instead
+
 ## Scheduled Deletion of Old Records with pg_cron
 
 ### Overview
