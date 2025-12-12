@@ -246,3 +246,212 @@ When recommending libraries, consider:
 - **Bundle size matters**: Check impact on frontend applications
 - **Read the docs**: Understand the API before dismissing as "too complex"
 - **Domain code only**: Save your effort for problems unique to your application
+
+## Fix Root Problems: Never Compromise on Quality
+
+### Overview
+
+When you encounter a problem while implementing the user's design, fix the root issue rather than abandoning the approach or disabling safeguards. If the user has specified a design pattern or architecture, honor it even when it creates challenges. Taking shortcuts—like disabling TypeScript, turning off tests, or ignoring lint rules—creates technical debt and undermines the quality foundation.
+
+### The Principle
+
+Quality tools like TypeScript, tests, and linters exist to catch problems. When they complain, they're doing their job. Disabling them is shooting the messenger. Similarly, if the user has chosen an architectural approach (events, dependency injection, etc.), they did so for good reasons. Abandoning it at the first sign of difficulty shows lack of discipline and understanding.
+
+### When TypeScript Definitions Break
+
+**Wrong Response:**
+```typescript
+// DON'T: Disable type checking
+// @ts-ignore
+emitter.emit('user:created', userData);
+
+// DON'T: Use 'any' to silence errors
+const emitter: any = new EventEmitter();
+```
+
+**Right Response:**
+```typescript
+// DO: Fix the type definitions
+import { EventEmitter } from 'node:events';
+
+interface ApplicationEvents {
+  'user:created': [user: User];
+  'user:deleted': [userId: number];
+}
+
+declare interface TypedEventEmitter {
+  on<K extends keyof ApplicationEvents>(
+    event: K,
+    listener: (...args: ApplicationEvents[K]) => void
+  ): this;
+  emit<K extends keyof ApplicationEvents>(
+    event: K,
+    ...args: ApplicationEvents[K]
+  ): boolean;
+}
+
+class TypedEventEmitter extends EventEmitter {}
+
+const emitter = new TypedEventEmitter();
+emitter.emit('user:created', user);  // Fully typed
+```
+
+### When Tests Fail
+
+**Wrong Response:**
+```typescript
+// DON'T: Skip failing tests
+test.skip('should validate email', () => {
+  // This test is failing, will fix later
+});
+
+// DON'T: Disable test temporarily
+// test('should create user', async () => {
+//   // Disabled because of database issues
+// });
+```
+
+**Right Response:**
+```typescript
+// DO: Fix the test or the implementation
+test('should validate email', () => {
+  // Fixed the validation logic to handle edge cases
+  const result = validateEmail('user@example.com');
+  expect(result.success).toBe(true);
+});
+
+// DO: Fix the underlying issue
+test('should create user', async () => {
+  // Fixed database setup in test environment
+  const user = await userService.createUser(validData);
+  expect(user.id).toBeDefined();
+});
+```
+
+### When Linters Complain
+
+**Wrong Response:**
+```typescript
+// DON'T: Disable lint rules
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function processData(data: any): any {
+  return data.map((item: any) => item.value);
+}
+
+// DON'T: Ignore all errors in file
+/* eslint-disable */
+```
+
+**Right Response:**
+```typescript
+// DO: Write code that satisfies the linter
+function processData<T extends { value: unknown }>(data: T[]): unknown[] {
+  return data.map((item) => item.value);
+}
+
+// DO: If rule is genuinely wrong for this case, disable with justification
+function legacyApiWrapper(data: LegacyType): ModernType {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Legacy API requires any
+  return (legacyLib as any).process(data);
+}
+```
+
+### When User's Design Seems Difficult
+
+**Wrong Response:**
+```typescript
+// User specified event-driven architecture, but you find it complex
+
+// DON'T: Abandon the pattern
+class UserService {
+  async createUser(data: CreateUserInput): Promise<User> {
+    const user = await this.db.users.create(data);
+    // Just call email service directly instead of events
+    await this.emailService.sendWelcome(user);
+    return user;
+  }
+}
+```
+
+**Right Response:**
+```typescript
+// DO: Implement the pattern correctly, even if challenging
+class UserService {
+  constructor(
+    private db: Database,
+    private emitter: TypedEventEmitter
+  ) {}
+
+  async createUser(data: CreateUserInput): Promise<User> {
+    const user = await this.db.users.create(data);
+    // Honor user's event-driven design
+    this.emitter.emit('user:created', user);
+    return user;
+  }
+}
+
+// Fix TypeScript definitions to make it work
+```
+
+### When Something "Just Won't Work"
+
+**Wrong Response:**
+- "TypeScript won't let me do this, so I'll use `any`"
+- "The tests keep failing, so I'll skip them for now"
+- "The linter is annoying, so I'll turn it off"
+- "This pattern is too hard, so I'll use a simpler approach"
+
+**Right Response:**
+- "TypeScript won't let me do this, so I'll fix my type definitions"
+- "The tests keep failing, so I'll fix the bug they're catching"
+- "The linter is complaining, so I'll write better code"
+- "This pattern is challenging, so I'll learn how to implement it correctly"
+
+### Examples of Proper Fixes
+
+#### Event Typing Challenge
+
+```typescript
+// Problem: User wants events, but EventEmitter isn't type-safe
+
+// DON'T give up on events and use callbacks instead
+// DO: Create properly typed event emitter (shown above)
+```
+
+#### Strict Null Check Errors
+
+```typescript
+// Problem: TypeScript strict null checks catch potential undefined access
+
+// DON'T: Disable strictNullChecks or use non-null assertions everywhere
+const user = await findUser(id)!;  // Wrong
+
+// DO: Handle null/undefined properly
+const user = await findUser(id);
+if (!user) {
+  throw new NotFoundError('User not found');
+}
+```
+
+#### Integration Test Complexity
+
+```typescript
+// Problem: Integration tests are complex to set up
+
+// DON'T: Switch to unit tests with mocks everywhere
+// DO: Invest in proper test infrastructure
+// - Docker compose for test databases
+// - Test fixtures and factories
+// - Database reset utilities
+```
+
+### Guidelines
+
+- **Honor the user's design choices**: They specified patterns for good reasons
+- **Fix TypeScript errors properly**: Add types, don't use `any` or `@ts-ignore`
+- **Fix failing tests**: Don't skip or disable them
+- **Respect linter rules**: Write compliant code, don't disable checks
+- **Solve root causes**: Don't work around problems with hacks
+- **Ask for clarification**: If the design seems wrong, ask the user to explain
+- **Learn the pattern**: If struggling with user's approach, understand it better
+- **Quality is non-negotiable**: Tests, types, and linting are safeguards, not obstacles
