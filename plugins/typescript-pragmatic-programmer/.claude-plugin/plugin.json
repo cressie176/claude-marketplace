@@ -1,0 +1,10 @@
+{
+  "name": "typescript-pragmatic-programmer",
+  "version": "1.0.0",
+  "description": "Pragmatic programming principles applied to TypeScript development",
+  "author": {
+    "name": "Stephen Cresswell"
+  },
+  "license": "MIT",
+  "skills": ["./skills/typescript-pragmatic-programmer"]
+}

@@ -73,6 +73,17 @@
       },
       "license": "MIT",
       "keywords": ["postgresql", "database", "patterns", "cookbook", "sql"]
+    },
+    {
+      "name": "typescript-pragmatic-programmer",
+      "source": "./plugins/typescript-pragmatic-programmer",
+      "version": "1.0.0",
+      "description": "Pragmatic programming principles applied to TypeScript development",
+      "author": {
+        "name": "Stephen Cresswell"
+      },
+      "license": "MIT",
+      "keywords": ["typescript", "pragmatic", "best-practices", "principles", "software-engineering"]
     }
   ]
 }
