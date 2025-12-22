@@ -143,6 +143,61 @@ function processOrder(order: Order): void {
 }
 ```
 
+## Async Functions
+
+**Return promises directly - don't use `return await`:**
+
+- When returning a promise from an async function, return it directly
+- Using `return await` adds unnecessary overhead and an extra microtask
+- The caller has to await anyway, so awaiting inside the function is redundant
+- Only use `await` when you need the value for further processing
+
+**Exception:** Use `return await` when inside a try-catch block and you need to catch errors from the promise.
+
+**Good (return promise directly):**
+```typescript
+async function getUser(id: string): Promise<User> {
+  return userRepository.findById(id);
+}
+
+async function processOrder(orderId: string): Promise<void> {
+  return orderService.process(orderId);
+}
+```
+
+**Bad (unnecessary await):**
+```typescript
+async function getUser(id: string): Promise<User> {
+  return await userRepository.findById(id);  // Redundant await
+}
+
+async function processOrder(orderId: string): Promise<void> {
+  return await orderService.process(orderId);  // Redundant await
+}
+```
+
+**Good (await when you need the value):**
+```typescript
+async function getUserWithOrders(id: string): Promise<UserWithOrders> {
+  const user = await userRepository.findById(id);  // Need user object
+  const orders = await orderRepository.findByUserId(user.id);  // Use user.id
+
+  return { user, orders };
+}
+```
+
+**Exception - use await in try-catch:**
+```typescript
+async function getUser(id: string): Promise<User> {
+  try {
+    return await userRepository.findById(id);  // Needed to catch errors here
+  } catch (error) {
+    logger.error('Failed to fetch user', { id, error });
+    throw error;
+  }
+}
+```
+
 ## Conditional Logic
 
 **Eliminate conditionals through design:**
