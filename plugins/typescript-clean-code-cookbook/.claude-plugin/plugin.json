@@ -13,5 +13,5 @@
     "code-quality",
     "maintainability"
   ],
-  "skills": ["./skills/typescript-clean-code"]
+  "skills": ["./skills/typescript-clean-code-cookbook"]
 }

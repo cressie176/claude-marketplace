@@ -1,5 +1,5 @@
 ---
-name: typescript-clean-code
+name: typescript-clean-code-cookbook
 description: Use this skill when writing, reviewing, or refactoring TypeScript code to ensure it follows clean code principles. Apply these standards to maintain clear, consistent, and maintainable code. Invoke automatically when generating functions, classes, or modules.
 allowed-tools: Read, Grep, Glob, Edit
 ---
