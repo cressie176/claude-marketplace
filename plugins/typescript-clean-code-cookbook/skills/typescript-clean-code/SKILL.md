@@ -55,6 +55,90 @@ arguments.get(name);  // Not arguments.getArgument(name)
 users.find(id);       // Not users.findUser(id)
 ```
 
+## Type Safety
+
+**Use explicit types and avoid `any`:**
+
+- TypeScript's type system is your ally - use it fully
+- Never use `any` except as an absolute last resort
+- `any` disables type checking and defeats the purpose of using TypeScript
+- Prefer `unknown` when the type is genuinely unknown - it forces you to narrow before use
+- Define proper types or interfaces for all data structures
+- Use generic types to maintain type safety in reusable code
+
+**Exception:** `any` may be acceptable when integrating with poorly-typed third-party libraries, but immediately wrap it with properly typed code.
+
+**Good (explicit types):**
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  age: number;
+}
+
+function createUser(data: User): User {
+  return { ...data };
+}
+
+function processData(value: unknown): string {
+  if (typeof value === 'string') {
+    return value.toUpperCase();
+  }
+  throw new Error('Expected string');
+}
+```
+
+**Bad (using any):**
+```typescript
+function createUser(data: any): any {  // Lost all type safety
+  return { ...data };
+}
+
+function processData(value: any): any {  // No type checking
+  return value.toUpperCase();  // Runtime error if value isn't string
+}
+```
+
+**Good (generic types maintain safety):**
+```typescript
+function findById<T extends { id: string }>(items: T[], id: string): T | undefined {
+  return items.find(item => item.id === id);
+}
+
+const user = findById(users, '123');  // Type is User | undefined
+const order = findById(orders, '456');  // Type is Order | undefined
+```
+
+**Bad (any loses type information):**
+```typescript
+function findById(items: any[], id: string): any {
+  return items.find(item => item.id === id);
+}
+
+const user = findById(users, '123');  // Type is any - no safety
+const order = findById(orders, '456');  // Type is any - no safety
+```
+
+**Good (wrapping third-party any):**
+```typescript
+import { poorlyTypedLibrary } from 'some-library';
+
+interface LibraryResponse {
+  data: string;
+  status: number;
+}
+
+function callLibrary(input: string): LibraryResponse {
+  const result: any = poorlyTypedLibrary.call(input);  // Last resort any
+  // Immediately convert to proper types
+  return {
+    data: String(result.data),
+    status: Number(result.status)
+  };
+}
+```
+
 ## Function Design
 
 **Write small, focused functions that do one thing well:**
