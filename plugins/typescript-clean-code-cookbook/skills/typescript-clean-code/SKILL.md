@@ -148,8 +148,7 @@ function processOrder(order: Order): void {
 **Return promises directly - don't use `return await`:**
 
 - When returning a promise from an async function, return it directly
-- Using `return await` adds unnecessary overhead and an extra microtask
-- The caller has to await anyway, so awaiting inside the function is redundant
+- The caller has to await anyway, so awaiting inside the function is redundant and reduces the signal-to-noise raising of the code
 - Only use `await` when you need the value for further processing
 
 **Exception:** Use `return await` when inside a try-catch block and you need to catch errors from the promise.
