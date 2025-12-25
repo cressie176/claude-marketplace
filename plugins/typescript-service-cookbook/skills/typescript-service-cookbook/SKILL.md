@@ -254,7 +254,9 @@ export function createLogger(options: LoggerOptions = {}) {
 
 ### Overview
 
-The Unit of Work pattern groups database operations into a single transaction, ensuring all operations succeed or fail together. This is the **preferred way to manage transactions** in your application. Using Node's AsyncLocalStorage allows services to join an active transaction without explicitly passing transaction objects through every function call. This provides transactional guarantees while keeping service code clean and focused.
+The Unit of Work pattern groups database operations into a single transaction, ensuring all operations succeed or fail together. Use this pattern **only when the orchestration layer (controller, route handler, message handler, etc.) coordinates multiple database interactions**, whether directly or through service methods. If your orchestration layer makes only a single database call, a transaction is unnecessary overhead—simply call the service method directly.
+
+Using Node's AsyncLocalStorage allows services to join an active transaction without explicitly passing transaction objects through every function call. This provides transactional guarantees while keeping service code clean and focused.
 
 **Critical Principle**: Start transactions at a level **above** individual database operations (typically in route handlers, message listeners, or use case orchestrators) so that multiple service methods can participate in the same transaction. Never start transactions within service methods—this prevents operations from being grouped atomically.
 
@@ -369,10 +371,11 @@ export default class OrganisationService {
 
 **Important Guidelines:**
 
-- **UnitOfWork is preferred**: Always use `unitOfWork.span()` to start transactions, not direct database transaction calls
+- **Only use for multiple database interactions**: Use `unitOfWork.span()` only when the orchestration layer coordinates multiple database operations; skip it for single database calls
+- **UnitOfWork is preferred**: When transactions are needed, always use `unitOfWork.span()` to start them, not direct database transaction calls
 - **Start transactions at boundaries**: Use `unitOfWork.span()` in route handlers, message listeners, or orchestrators—never in services
 - **Join transactions in services**: Services use `joinTransaction()` to participate in the active transaction
-- **One transaction per use case**: Each HTTP request, message, or scheduled job should have one unit of work span
+- **One transaction per use case**: Each HTTP request, message, or scheduled job should have at most one unit of work span
 - **Multiple operations, one transaction**: Group related database operations under a single span so they succeed or fail atomically
 - **Name your spans**: Use descriptive names for unit of work spans to aid debugging
 - **Throw on missing transaction**: `joinTransaction()` should throw if no transaction is active
