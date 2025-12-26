@@ -25,6 +25,31 @@ This skill provides guidance on library selection for JavaScript and TypeScript 
 - Suggest installing multiple alternatives "to have them available"
 - Install libraries without an immediate, concrete use case
 
+## CRITICAL: How to Install npm Packages
+
+**ALWAYS use `npm install` directly with `@latest` to install packages. NEVER manually edit package.json and run npm install.**
+
+**Correct installation patterns:**
+
+```bash
+# Production dependencies
+npm install library1@latest library2@latest library3@latest
+
+# Development dependencies
+npm install --save-dev library1@latest library2@latest library3@latest
+```
+
+**Why this approach:**
+- npm automatically determines the correct version
+- Avoids version specification errors
+- Ensures package-lock.json is properly updated
+- Prevents inconsistencies between package.json and installed versions
+
+**NEVER:**
+- Manually edit package.json to add dependencies
+- Guess version numbers when adding to package.json
+- Run `npm install` after manually editing package.json for new packages
+
 ## CRITICAL: Respect Existing Project Preferences
 
 **BEFORE suggesting any libraries from this skill, you MUST:**
