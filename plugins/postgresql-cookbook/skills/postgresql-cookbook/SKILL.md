@@ -60,6 +60,34 @@ WHERE "createdAt" > NOW();
 4. **Functions**: snake_case verbs (e.g., `cleanup_old_logs`, `process_pending_jobs`)
 5. **Never quote**: If you find yourself needing quotes, rename to snake_case instead
 
+## Stored Procedures
+
+### Overview
+
+Stored procedures (functions) in PostgreSQL can be useful for specific use cases, but should be used judiciously. They are acceptable when kept small and focused on database operations, but should never contain business logic.
+
+### When to Use Stored Procedures
+
+Stored procedures are appropriate for:
+
+1. **Database maintenance tasks**: Cleanup operations, scheduled jobs
+2. **Simple data transformations**: Formatting, calculations that stay within the database
+3. **Triggers**: Automated actions on INSERT/UPDATE/DELETE
+
+### Key Constraints
+
+1. **Keep them small**: Functions should be short and focused on a single task
+2. **No business logic**: Business rules belong in application code where they can be tested, versioned, and easily modified
+3. **Avoid complex queries**: PostgreSQL cannot estimate execution costs for stored procedures, making query optimisation difficult. For complex queries, keep the SQL in your application code where the query planner can optimise it properly.
+
+### Best Practices
+
+1. **Keep functions small and focused**: Each function should do one thing well
+2. **Application code for business logic**: Never put business rules in the database
+3. **Avoid for complex queries**: PostgreSQL can't estimate costs for stored procedures
+4. **Document purpose clearly**: Explain why the function exists in the database rather than application code
+5. **Consider application-side alternatives**: Question whether the function could be better implemented in your application
+
 ## Scheduled Deletion of Old Records with pg_cron
 
 ### Overview
