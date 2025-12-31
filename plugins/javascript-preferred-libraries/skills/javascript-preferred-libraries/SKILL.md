@@ -7,22 +7,19 @@ allowed-tools: Read, Grep, Glob
 # JavaScript/TypeScript Preferred Libraries
 
 This skill provides guidance on library selection for JavaScript and TypeScript projects. Use this when:
-- Generating new code that requires external dependencies
-- Suggesting libraries to solve a problem
-- Making architectural decisions about technology choices
-- Reviewing existing dependencies
+- implementing or planning functionality that is likely to be already provided in a library
+- explicitly asked to recommend a library
+- explicitly asked to review existing dependencies
 
 ## CRITICAL: Install Libraries Only When Actually Needed
 
 **DO NOT install libraries preemptively or "just in case". Only install when:**
-- The current task explicitly requires the library's functionality
-- You are actively writing code that uses the library
+- The current task will be simplified by the library's functionality
 - The user has explicitly requested the library be added
 
 **NEVER:**
 - Install libraries for potential future use
 - Add dependencies for features not currently being implemented
-- Suggest installing multiple alternatives "to have them available"
 - Install libraries without an immediate, concrete use case
 
 ## CRITICAL: How to Install npm Packages
@@ -56,20 +53,14 @@ npm install --save-dev library1@latest library2@latest library3@latest
 
 1. **Check package.json** - If the project already has alternative libraries installed for the same purpose, use those instead of suggesting preferences from this skill
 2. **Check CLAUDE.md files** - Look for library preferences in:
-   - User's global `~/.claude/CLAUDE.md`
-   - Project's `CLAUDE.md`
-   - Any other project-specific configuration files
+   - The user's global claude configuration
+   - The projects's claude configuration
 3. **Check other configuration** - Look for preferences in project documentation, ADRs (Architecture Decision Records), or other relevant files
 
-**Only suggest libraries from this skill when:**
-- No alternative library is currently in use for that purpose
-- No preference is specified in more specific configuration (CLAUDE.md, project docs, etc.)
-- The project explicitly asks for recommendations or is starting fresh
-
 **If existing preferences conflict with this skill:**
-- Respect and use the project's existing choices
+- Respect and use the users or project's existing choices
 - DO NOT suggest replacing them unless explicitly asked
-- The project's choices take precedence over this skill's preferences
+- The user and project's choices take precedence over this skill's preferences
 
 ## Library Preferences by Category
 
@@ -78,11 +69,9 @@ npm install --save-dev library1@latest library2@latest library3@latest
 **Prefer:**
 - **Hono** - Good TypeScript support, builds on Express patterns
 
-**Acceptable:**
-- **Express** - Established, widely used
-
 **Avoid:**
-- **Fastify** - TypeScript ends up being nasty
+- **Fastify** - The TypeScript support is not as good as Hono's
+- **Express** - The TypeScript support is not as good as Hono's
 
 ### ORM / Database Clients
 
@@ -91,11 +80,11 @@ npm install --save-dev library1@latest library2@latest library3@latest
 
 **Acceptable:**
 - **Slonik** - Not an ORM, but acceptable for direct SQL queries
+- **Raw PostgreSQL clients** - Only acceptable for extremely trivial applications, otherwise avoid
 
 **Avoid:**
 - **Prisma** - Long history of poor decision making
 - **Sequelize** - Mature, but not TypeScript friendly
-- **Raw PostgreSQL clients** - Only use for extremely trivial applications
 
 ### Testing Frameworks
 
@@ -103,8 +92,11 @@ npm install --save-dev library1@latest library2@latest library3@latest
 - **Node test framework** (`node:test`) - Native, fast, no dependencies
 - **Node assert** (`node:assert`) - Native assertion library
 
+**Acceptable:**
+- **Vitest** - Faster than Jest, but still more complicated than Node's native test framework
+
 **Avoid:**
-- **Jest** - Very slow to start, rewrites your code messing with the import order, lots of bugs
+- **Jest** - Very slow to start, rewrites your code messing with the import order, bloated, lots of bugs
 - **Mocha** - High false-positive CVE
 
 ### Date/Time
@@ -130,8 +122,8 @@ npm install --save-dev library1@latest library2@latest library3@latest
 - **zod** - Best TypeScript integration, type inference
 
 **Acceptable:**
-- **yup** - OK alternative
-- **ajv** - OK if JSON Schema validation specifically required
+- **yup** - A good alernative to zod
+- **ajv** - Use when JSON Schema validation is specifically required
 
 **Avoid:**
 - **joi** - Draws in too many dependencies
@@ -143,6 +135,7 @@ npm install --save-dev library1@latest library2@latest library3@latest
 
 **Avoid:**
 - **ESLint** - Dependencies have false positives, nightmare to update
+- **Prettier** - Offers too little control and does a bad job of line wrapping
 
 ### Git Hooks
 
@@ -155,11 +148,12 @@ npm install --save-dev library1@latest library2@latest library3@latest
 ### Logging
 
 **Prefer:**
-- **logtape** - Simple, predictable
+- **logtape** - No dependencies, supports structured logging
 
 **Avoid:**
-- **Pino** - Over complicated, workers result in unpredictable behaviour, non-standard API
-- **winston** - Full of bugs
+- **pino** - Over complicated, workers result in unpredictable behaviour, non-standard API, hard to control the output
+- **bunyan** - Slow, and full of nasty surprises (like dropping logs if their attributes clash with bunyan reserved properties), poor pretty formatting support
+- **winston** - Buggy and slow
 
 ## Usage Guidelines
 
